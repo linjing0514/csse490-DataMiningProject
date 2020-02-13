@@ -2,7 +2,7 @@ body{
   margin:0;
   padding:0;
   font-family: sans-serif;
-  background-image: url(../img/benjamin-gremler-qONhYBVNz1c-unsplash.jpg);
+  background-image: url(../img/blur_benjamin-gremler-qONhYBVNz1c-unsplash.jpg);
   background-size: cover;
   background-repeat: no-repeat;
   background-attachment: fixed;
@@ -12,7 +12,7 @@ nav{
   position: relative;
   width: 100%;
   height:80px;
-  background: "..\img\benjamin-gremler-qONhYBVNz1c-unsplash.jpg";
+  background: "..\img\blur_benjamin-gremler-qONhYBVNz1c-unsplash.jpg";
   background-position: center center;
 }
 nav header{
