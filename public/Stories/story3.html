@@ -37,12 +37,12 @@
 
   <script>
 
-// set the dimensions and margins of the graph
+// Set graph dimensions
 var margin = {top: 10, right: 30, bottom: 30, left: 60},
     width = 460 - margin.left - margin.right,
     height = 400 - margin.top - margin.bottom;
 
-// append the svg object to the body of the page
+// Append SVG to page body
 var svg = d3.select("#my_dataviz")
   .append("svg")
     .attr("width", width + margin.left + margin.right)
@@ -51,25 +51,24 @@ var svg = d3.select("#my_dataviz")
     .attr("transform",
           "translate(" + margin.left + "," + margin.top + ")");
 
-//Read the data
+// Read the data:
 d3.csv("../Data/CuisineTypeByBoro/americanCuisineByBoro.csv",
 
-  // When reading the csv, I must format variables:
   function(d){
-    return { index : d.index, value : d.NumViolations }
+    return { index : d.Index, value : d.NumViolations }
   },
 
-  // Now I can use this dataset:
   function(data) {
 
-    // Add X axis --> it is a date format
+    // Add X axis
+	
     var x = d3.scaleLinear()
-      .domain([d3.min(data, function(d) { return +d.index; }), d3.max(data, function(d) { return +d.index; })])
+      .domain([1,5])// d3.size(d.index)      // d.index      // [d3.min(data, function(d) { return +d.index; }), d3.max(data, function(d) { return +d.index; })]
       .range([ 0, width ]);
     svg.append("g")
       .attr("transform", "translate(0," + height + ")")
       .call(d3.axisBottom(x));
-
+	
     // Add Y axis
     var y = d3.scaleLinear()
       .domain([d3.min(data, function(d) { return +d.value; }), d3.max(data, function(d) { return +d.value; })])
@@ -93,7 +92,7 @@ d3.csv("../Data/CuisineTypeByBoro/americanCuisineByBoro.csv",
       .attr("text-anchor", "middle")
       .style("font-size", "16px")
       .style("text-decoration", "underline")
-      .text("Manhattan Score Over Time");
+      .text("American cuisine number of violations by boro");
 })
 
 </script>
