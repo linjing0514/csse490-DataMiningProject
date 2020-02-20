@@ -8,6 +8,7 @@
   <link rel="stylesheet" type="text/css" href="../CSS/style.css">
   <title>Story 3</title>
   <script src="https://code.jquery.com/jquery-3.3.0.js"></script>
+  
   <script type="text/javascript">
     $(document).ready(function(){
       $('.toggle').click(function(){
@@ -29,9 +30,121 @@
     </header>
   </nav>
 
-  <h1>This is Story 3!!!</h1>
+<h1>Cuisine Types By Boro</h1>
+<a>This is one example: American Restaurant Violations by Boro </a>
+<div id="op_dataviz2"></div>
 
+<script src="https://www.gstatic.com/firebasejs/7.8.2/firebase-firestore.js"></script>
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+
+<div id="op_dataviz"></div>
+
+<script>
+
+// Graph dimensions
+var margin = {top: 10, right: 30, bottom: 90, left: 40},
+    width = 800 - margin.left - margin.right,
+    height = 450 - margin.top - margin.bottom;
+
+var data = d3.range(10).map(Math.random).sort(d3.descending);
+console.log(data);
+
+// Append SVG to page body
+var svg = d3.select("#op_dataviz")
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+// Read the data:
+d3.csv("../Data/CuisineTypeByBoro/americanCuisineByBoro.csv", function(data) {
+
+  /*function(d){
+    return { index : d.BoroName, value : d.NumViolations }
+  },*/
+  
+console.log(data.NumViolations);
+// Add X axis
+var x = d3.scaleBand()
+	.range([ 0, width ])
+	.domain(data.map(function(d) { return d.BoroName; }))
+	.padding(0.2);
+svg.append("g")
+	.attr("transform", "translate(0," + height + ")")
+	.call(d3.axisBottom(x))
+	.selectAll("text")
+	.attr("transform", "translate(-10,0)rotate(-45)")
+	.style("text-anchor", "end");	
+/*
+var x = d3.scaleLinear()
+	.domain([0,5])// d3.size(d.index)      // d.index      // [d3.min(data, function(d) { return +d.index; }), d3.max(data, function(d) { return +d.index; })]
+	.range([ 0, width ]);
+svg.append("g")
+	.attr("transform", "translate(0," + height + ")")
+	.call(d3.axisBottom(x));
+*/
+
+// Add Y axis
+/*
+var y = d3.scaleLinear()
+	.domain([d3.min(data, function(d) { return +d.value; }), d3.max(data, function(d) { return +d.value; })])
+	.range([ height, 0 ]);
+svg.append("g")
+	.call(d3.axisLeft(y));
+*/
+var y = d3.scaleLinear()
+	.domain([0, 50000])
+	.range([ height, 0]);
+svg.append("g")
+	.call(d3.axisLeft(y));
+
+// Add the line
+/*
+svg.append("path")
+	.datum(data)
+	.attr("fill", "none")
+	.attr("stroke", "black")
+	.attr("stroke-width", 2)
+	.attr("d", d3.line()
+	.x(function(d) { return x(d.index) })
+	.y(function(d) { return y(d.value) })
+	)
+*/
+
+svg.selectAll("mybar")
+	.data(data)
+	.enter()
+	.append("rect")
+	.attr("x", function(d) { return x(d.BoroName); })
+	.attr("width", x.bandwidth())
+	.attr("fill", "#69b3a2")
+	// no bar at the beginning thus:
+	.attr("height", function(d) { return height - y(0); }) // always equal to 0
+	.attr("y", function(d) { return y(0); })
+
+/*
+svg.append("text")
+	.attr("x", (width / 2))
+	.attr("y", 0 - (margin.top / 2) + 20)
+	.attr("text-anchor", "middle")
+	.style("font-size", "16px")
+	.style("text-decoration", "underline")
+	.text("American cuisine number of violations by boro");
+*/
+
+	// Animation
+svg.selectAll("rect")
+	.transition()
+	.duration(2000)
+	.attr("y", function(d) { return y(d.NumViolations); })
+	.attr("height", function(d) { return height - y(d.NumViolations); })
+	.delay(function(d,i){console.log(i) ; return(i*100)})
+})
+
+</script>
 </body>
-
 </html>
 <html>

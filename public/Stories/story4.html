@@ -1,0 +1,105 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" type="text/css" href="../CSS/style.css">
+    <title>Story 4</title>
+    <script src="https://code.jquery.com/jquery-3.3.0.js"></script>
+    <script src="https://d3js.org/d3.v4.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+        $('.toggle').click(function(){
+        $('ul').toggleClass('active');
+        })
+        })
+    </script>
+</head>
+<body>
+    <nav>
+        <header>
+            <a href="index.html" class="logo"><img src="../img\logo.png"></a>
+            <a class="toggle">Menu</a>
+            <ul>
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="MainStory.html">Story</a></li>
+                <li><a href="../about.html">About Us</a></li>
+            </ul>
+        </header>
+    </nav>
+
+    <h1>Number of inspections throughout the years</h1>
+    Over time, the group observed some interesting trends about the number of inspections throughout the years. <br><br>
+    They noticed that as time went on the number of inspections were increasing steadily.
+
+    <div id="my_dataviz"></div>
+
+    <script>
+
+        // set the dimensions and margins of the graph
+        var margin = {top: 10, right: 30, bottom: 30, left: 60},
+        width = 460 - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom;
+
+        // append the svg object to the body of the page
+        var svg = d3.select("#my_dataviz")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform",
+        "translate(" + margin.left + "," + margin.top + ")");
+
+        //Read the data
+        d3.csv("../Data/Bill/inspections_every_year.csv",
+
+        // When reading the csv, I must format variables:
+        function(d){
+        return { index : d.index, value : d.number }
+        },
+
+        // Now I can use this dataset:
+        function(data) {
+
+        // Add X axis --> it is a date format
+        var x = d3.scaleLinear()
+        .domain([d3.min(data, function(d) { return +d.index; }), d3.max(data, function(d) { return +d.index; })])
+        .range([ 0, width ]);
+        svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x));
+
+        // Add Y axis
+        var y = d3.scaleLinear()
+        .domain([d3.min(data, function(d) { return +d.value; }), d3.max(data, function(d) { return +d.value; })])
+        .range([ height, 0 ]);
+        svg.append("g")
+        .call(d3.axisLeft(y));
+
+        // Add the line
+        svg.append("path")
+        .datum(data)
+        .attr("fill", "none")
+        .attr("stroke", "black")
+        .attr("stroke-width", 2)
+        .attr("d", d3.line()
+        .x(function(d) { return x(d.index) })
+        .y(function(d) { return y(d.value) })
+        )
+        svg.append("text")
+        .attr("x", (width / 2))
+        .attr("y", 0 - (margin.top / 2) + 20)
+        .attr("text-anchor", "middle")
+        .style("font-size", "16px")
+        .style("text-decoration", "underline")
+        .text("Number of Inspections from 2016 ~ 2019");
+        })
+
+    </script>
+
+</body>
+
+</html>
+<html>
