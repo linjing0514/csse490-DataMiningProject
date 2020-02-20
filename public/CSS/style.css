@@ -1,5 +1,4 @@
 body{
-  color:#FFF;
   margin:0;
   padding:0;
   font-family: sans-serif;
@@ -8,6 +7,7 @@ body{
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-position: center;
+  color:#FFF;
 }
 nav{
   position: relative;
