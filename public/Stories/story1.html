@@ -33,23 +33,115 @@
   <h1>Restaurant Ratings Over Time</h1>
   Over time, the group observed some interesting trends about the average inspection score. <br><br>
   They noticed that as time went on the score got worse (higher score means more violations).
+<br>
+  <!-- Add 2 buttons -->
+  <button onclick="update('Manhattan')">Manhattan</button>
+  <button onclick="update('Bronx')">Bronx</button>
+  <button onclick="update('Brooklyn')">Brooklyn</button>
+  <button onclick="update('Queens')">Queens</button>
+  <button onclick="update('Staten Island')">Staten Island</button>
 
-  <!-- <div id="htmlEmbed"></div>
+<div id="my_dataviz"></div>
+
   <script>
-  d3.select("#htmlEmbed").append("img")
-      .attr("src","../Data/Time/Manhattan.svg")
-      .attr("width", 500)
-      .attr("height", 500)
-  </script> -->
 
-  <div id="my_dataviz"></div>
+  // set the dimensions and margins of the graph
+  var margin = {top: 10, right: 30, bottom: 30, left: 50},
+      width = 700 - margin.left - margin.right,
+      height = 500 - margin.top - margin.bottom;
 
-  <script>
+  // append the svg object to the body of the page
+  var svg = d3.select("#my_dataviz")
+    .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
+
+  // Initialise a X axis:
+  var x = d3.scaleLinear().range([0,width]);
+  var xAxis = d3.axisBottom().scale(x);
+  svg.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .attr("class","myXaxis")
+
+  // Initialize an Y axis
+  var y = d3.scaleLinear().range([height, 0]);
+  var yAxis = d3.axisLeft().scale(y);
+  svg.append("g")
+    .attr("class","myYaxis")
+
+  // Create a function that takes a dataset as input and update the plot:
+  function update(data) {
+
+    d3.csv("../Data/Time/RollingAveragesSmall.csv",
+
+      // When reading the csv, I must format variables:
+      function(d){
+        return { ser1 : d.index, ser2 : d[data] }
+      },
+
+      // Now I can use this dataset:
+      function(data) {
+
+        // Create the X axis:
+        x.domain([d3.min(data, function(d) { return d.ser1 }), d3.max(data, function(d) { return d.ser1 }) ]);
+        svg.selectAll(".myXaxis").transition()
+          .duration(3000)
+          .call(xAxis);
+
+        // create the Y axis
+        y.domain([d3.min(data, function(d) { return d.ser2  }), d3.max(data, function(d) { return d.ser2  }) ]);
+        svg.selectAll(".myYaxis")
+          .transition()
+          .duration(3000)
+          .call(yAxis);
+
+        // Create a update selection: bind to the new data
+        var u = svg.selectAll(".lineTest")
+          .data([data], function(d){ return d.ser1 });
+
+        // Updata the line
+        u
+          .enter()
+          .append("path")
+          .attr("class","lineTest")
+          .merge(u)
+          .transition()
+          .duration(3000)
+          .attr("d", d3.line()
+            .x(function(d) { return x(d.ser1); })
+            .y(function(d) { return y(d.ser2); }))
+            .attr("fill", "none")
+            .attr("stroke", "black")
+            .attr("stroke-width", 2.5)
+
+    })
+
+
+  }
+
+  // At the beginning, I run the update function on the first dataset:
+  update("Manhattan")
+
+  </script>
+
+
+  <!-- <div id="option">
+    <input name="updateButton"
+           type="button"
+           value="Change Dataset"
+           onclick="updateData()" />
+</div>
+
+<script>
 
 // set the dimensions and margins of the graph
 var margin = {top: 10, right: 30, bottom: 30, left: 60},
-    width = 460 - margin.left - margin.right,
-    height = 400 - margin.top - margin.bottom;
+    width = 700 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
 
 // append the svg object to the body of the page
 var svg = d3.select("#my_dataviz")
@@ -65,26 +157,28 @@ d3.csv("../Data/Time/RollingAveragesSmall.csv",
 
   // When reading the csv, I must format variables:
   function(d){
-    return { index : d.index, value : d.Manhattan }
+    return { index : d.index, manhattan : d.Manhattan, bronx : d.Bronx }
   },
 
   // Now I can use this dataset:
   function(data) {
 
-    // Add X axis --> it is a date format
+    // Add X axis
     var x = d3.scaleLinear()
       .domain([d3.min(data, function(d) { return +d.index; }), d3.max(data, function(d) { return +d.index; })])
       .range([ 0, width ]);
     svg.append("g")
       .attr("transform", "translate(0," + height + ")")
-      .call(d3.axisBottom(x));
+      .call(d3.axisBottom(x))
+      .attr("class", "myXaxis");
 
     // Add Y axis
     var y = d3.scaleLinear()
-      .domain([d3.min(data, function(d) { return +d.value; }), d3.max(data, function(d) { return +d.value; })])
+      .domain([d3.min(data, function(d) { return +d.manhattan; }), d3.max(data, function(d) { return +d.manhattan; })])
       .range([ height, 0 ]);
     svg.append("g")
-      .call(d3.axisLeft(y));
+      .call(d3.axisLeft(y))
+      .attr("class","myYaxis");
 
     // Add the line
     svg.append("path")
@@ -94,17 +188,70 @@ d3.csv("../Data/Time/RollingAveragesSmall.csv",
       .attr("stroke-width", 2)
       .attr("d", d3.line()
         .x(function(d) { return x(d.index) })
-        .y(function(d) { return y(d.value) })
+        .y(function(d) { return y(d.manhattan) })
         )
-    svg.append("text")
-      .attr("x", (width / 2))
-      .attr("y", 0 - (margin.top / 2) + 20)
-      .attr("text-anchor", "middle")
-      .style("font-size", "16px")
-      .style("text-decoration", "underline")
-      .text("Manhattan Score Over Time");
-})
 
-</script>
+    // svg.append("text")
+    //   .attr("x", (width / 2))
+    //   .attr("y", 0 - (margin.top / 2) + 20)
+    //   .attr("text-anchor", "middle")
+    //   .style("font-size", "16px")
+    //   .style("text-decoration", "underline")
+    //   .text("Manhattan Score Over Time");
+
+
+})
+// ** Update data section (Called from the onclick)
+function updateData() {
+  d3.csv("../Data/Time/RollingAveragesSmall.csv",
+
+    // When reading the csv, I must format variables:
+    function(d){
+      return { index : d.index, value : d.Bronx }
+    },
+
+    // Now I can use this dataset:
+    function(data) {
+
+      // Add X axis
+      var x = d3.scaleLinear()
+        .domain([d3.min(data, function(d) { return +d.index; }), d3.max(data, function(d) { return +d.index; })])
+        .range([ 0, width ]);
+      svg.select("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x));
+
+      // Add Y axis
+      var y = d3.scaleLinear()
+        .domain([d3.min(data, function(d) { return +d.value; }), d3.max(data, function(d) { return +d.value; })])
+        .range([ height, 0 ]);
+      svg.select("g")
+        .call(d3.axisLeft(y));
+
+      // Add the line
+      svg.select("path")
+        .datum(data)
+        .attr("fill", "none")
+        .attr("stroke", "black")
+        .attr("stroke-width", 2)
+        .attr("d", d3.line()
+          .x(function(d) { return x(d.index) })
+          .y(function(d) { return y(d.value) })
+          )
+
+      svg.select("text")
+        .attr("x", (width / 2))
+        .attr("y", 0 - (margin.top / 2) + 20)
+        .attr("text-anchor", "middle")
+        .style("font-size", "16px")
+        .style("text-decoration", "underline")
+        .text("Manhattan Score Over Time");
+
+
+  })
+
+}
+
+</script> -->
 </html>
 <html>
