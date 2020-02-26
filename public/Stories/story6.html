@@ -39,6 +39,7 @@
 
 
 <script src="https://d3js.org/d3.v3.min.js"></script>
+<script src="https://d3js.org/colorbrewer.v1.min.js"></script>
 
 <script>
 var margin = {top: 20, right: 20, bottom: 30, left: 40},
@@ -66,10 +67,9 @@ var yValue = function(d) { return d.Latitude;}, // data -> value
 
 // setup fill color
 var cValue = function(d) { return d["SCORE"];},
-    // color = d3.scale.category20c();
-    color = d3.scale.ordinal()
-    .domain([0,160])
-    .range(colorbrewer.RdBu[9]);
+    color = d3.scale.linear()
+    .domain([-1,124,164])
+    .range(colorbrewer.PiYG[3]);
 
 
 // add the graph canvas to the body of the webpage
@@ -129,7 +129,8 @@ d3.csv("../Data/CuisineSummary/10rest.csv", function(error, data) {
                .duration(200)
                .style("opacity", .9);
           tooltip.html(d["DBA"]+" "+ d["CUISINE DESCRIPTION"] + "<br/>"
-          + d["BORO"] +" "+ d["BUILDING"]+ " "+ d["STREET"]+" "+d["ZIPCODE"]
+          +"Score: "+ d["SCORE"]
+          +"<br/> "+ d["BORO"] +" "+ d["BUILDING"]+ " "+ d["STREET"]+" "+d["ZIPCODE"]
           +"<br/>"+ "Phone#: "+d["PHONE"]
           +"<br/> (" + xValue(d)
 	        + ", " + yValue(d) + ")")
@@ -140,7 +141,14 @@ d3.csv("../Data/CuisineSummary/10rest.csv", function(error, data) {
           tooltip.transition()
                .duration(500)
                .style("opacity", 0);
-      });
+      })
+      .on("click", function(d){
+        var link = "https://www.yelp.com/search?find_desc="+d["DBA"]+"&find_loc=New+York%2C+NY&ns=1";
+        window.open(
+          link,
+          '_blank' // <- This is what makes it open in a new window.
+  );
+        });
 
   // draw legend
   var legend = svg.selectAll(".legend")
