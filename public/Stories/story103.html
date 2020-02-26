@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" type="text/css" href="../CSS/style.css">
+  <title>Story 2</title>
+  <script src="https://code.jquery.com/jquery-3.3.0.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function(){
+      $('.toggle').click(function(){
+        $('ul').toggleClass('active');
+      })
+    })
+  </script>
+</head>
+<body>
+  <nav>
+    <header>
+      <a href="index.html" class="logo"><img src="../img\logo.png"></a>
+      <a class="toggle">Menu</a>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="MainStory.html">Story</a></li>
+        <li><a href="../about.html">About Us</a></li>
+      </ul>
+    </header>
+  </nav>
+  <div class = "content"> 
+
+  <h1>Types of Violations By Borough</h1>
+  <p>The pie charts below demonstrate what the actual breakdown of the top 10 violations were within each individual borough. As you can see, the violations that consistently appear at the top among each borough
+	 are violations 10F and 08A which we were able to see from the second bar graph is the most frequently occurring violation in each one as well as in New York in general. While many of the boroughs share similar
+	 types of violations, there are some violations that are unique to a specific borough while others have varying counts of the same violation.
+  </p>
+
+  <!-- <script src="https://www.gstatic.com/firebasejs/7.8.2/firebase-firestore.js"></script>-->
+  	<script src="https://d3js.org/d3.v4.js"></script>
+  	<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+
+    <br>
+    <div align = "left">
+        <big><big><big><a href="story104.html">&#8592; Queens</a></big></big></big>
+    </div>
+    <div align = "right">
+        <big><big><big><a href="story102.html">Manhattan &#8594;</a></big></big></big>
+    </div>
+    <br>
+     <h3 align ="center"> Brooklyn Violation Count </h3>
+  	<div align = "center" id="jc_dataviz"></div>
+
+     <!--pie chart-->
+    <script>
+      var margin = {top: 280, right: 40, bottom: 90, left: 485},
+          width = 1800 - margin.left - margin.right,
+          height = 600 - margin.top - margin.bottom;
+          radius = 800 / 3;
+
+   var color = d3.scaleOrdinal()
+                 .range(["#9A33FF", "#33B3FF", "#F79C19", "#33FF88", "F314AF", "#F7E919", "#F31B14", "#BF643D", "#2EAD95", "#AD2E54"]);
+   var data = d3.range(10).map(Math.random).sort(d3.ascending);
+
+   var svg = d3.select("#jc_dataviz")
+     .append("svg")
+   	.attr("width", width + margin.left + margin.right)
+       .attr("height", height + margin.top + margin.bottom)
+     .append("g")
+       .attr("transform",
+             "translate(" + margin.left + "," + margin.top + ")");
+
+  //arc generator
+  var arc = d3.arc()
+              .outerRadius(radius - 10)
+              .innerRadius(0);
+
+  var labelArc = d3.arc()
+                   .outerRadius(radius - 50)
+                   .innerRadius(radius - 50);
+
+  var pie = d3.pie()
+              .sort(null)
+              .value(function(d) {return d.Count;});
+
+   // import the Data
+  d3.csv("../Data/BoroughSummaries/BrooklynViolationCount.csv", function(data){
+      //parse the data
+      data.forEach(function(d){
+        d.Count = +d.Count; //"23" -> 23
+        d.Type = d.Type; //"10F" -> "10F"
+      });
+
+      //append g elements (arc)
+      var g = svg.selectAll(".arc")
+                 .data(pie(data))
+                 .enter().append("g")
+                 .attr("class", "arc");
+
+      //append the path of the arc
+      g.append("path")
+       .attr("d", arc)
+       .style("fill", function(d) { return color(d.data.Type); })
+       .transition()
+       .ease(d3.easeLinear)
+       .duration(2000)
+       .attrTween("d", pieTween);
+
+
+      //append the text(labels)
+      g.append("text")
+      .transition()
+      .ease(d3.easeLinear)
+      .duration(2000)
+      .attrTween("d", pieTween)
+       .attr("transform", function(d) {return "translate(" + labelArc.centroid(d) + ")";})
+       .attr("dy",".35em")
+       .text(function(d) {return d.data.Type;});
+
+       function pieTween(b){
+         b.innerRadius = 0;
+         var i = d3.interpolate({startAngle: 0, endAngle: 0}, b);
+         return function(t) {return arc(i(t));};
+       }
+  })
+    </script>
+    </div>
+  </body>
+
+  </html>
+  <html>
