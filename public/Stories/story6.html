@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <link rel="stylesheet" type="text/css" href="../CSS/style.css">
-  <title>Story 5</title>
+  <title>Story 6</title>
   <script src="https://code.jquery.com/jquery-3.3.0.js"></script>
   <script type="text/javascript">
     $(document).ready(function(){
@@ -37,35 +37,6 @@
 <script src="https://www.gstatic.com/firebasejs/7.8.2/firebase-database.js"></script>
 <script src="https://www.gstatic.com/firebasejs/7.8.2/firebase-firestore.js"></script>
 
-<script>
-  // Your web app's Firebase configuration
-  const config = {
-    apiKey: "AIzaSyBPS0PSlAwzR0LBhrXT8kjX5x3YovX9nFo",
-    authDomain: "dataminingproject-67629.firebaseapp.com",
-    databaseURL: "https://dataminingproject-67629.firebaseio.com",
-    projectId: "dataminingproject-67629",
-    storageBucket: "dataminingproject-67629.appspot.com",
-    messagingSenderId: "921764207056",
-    appId: "1:921764207056:web:2325f4ad890edbd74941d5",
-    measurementId: "G-GLMKHGZZ3C"
-  };
-  // Initialize Firebase
-  firebase.initializeApp(config);
-
-  //Get elements
-  const preObject = document.getElementById('results');
-
-  // Create references
-  const dbRefObject = firebase.database().ref().child('results');
-  //sync object changes
-  dbRefObject.on('value', snap =>
-        console.log(snap.val())
-  );
-  // const db = firebase.firestore();
-  // db.collection('results').get().then(res =>{
-  //   console.log(res);
-  // });
-</script>
 
 <script src="https://d3js.org/d3.v3.min.js"></script>
 
@@ -83,7 +54,7 @@ var margin = {top: 20, right: 20, bottom: 30, left: 40},
 
 // setup x
 var xValue = function(d) { return d.Longitude;}, // data -> value
-    xScale = d3.scale.linear().range([0, width]), // value -> display
+    xScale = d3.scale.linear().range([width, 0]), // value -> display
     xMap = function(d) { return xScale(xValue(d));}, // data -> display
     xAxis = d3.svg.axis().scale(xScale).orient("bottom");
 
@@ -94,8 +65,12 @@ var yValue = function(d) { return d.Latitude;}, // data -> value
     yAxis = d3.svg.axis().scale(yScale).orient("left");
 
 // setup fill color
-var cValue = function(d) { return d["CUISINE DESCRIPTION"];},
-    color = d3.scale.category10();
+var cValue = function(d) { return d["SCORE"];},
+    // color = d3.scale.category20c();
+    color = d3.scale.ordinal()
+    .domain([0,160])
+    .range(colorbrewer.RdBu[9]);
+
 
 // add the graph canvas to the body of the webpage
 var svg = d3.select("body").append("svg")
@@ -153,7 +128,10 @@ d3.csv("../Data/CuisineSummary/10rest.csv", function(error, data) {
           tooltip.transition()
                .duration(200)
                .style("opacity", .9);
-          tooltip.html(d["CUISINE DESCRIPTION"] + "<br/> (" + xValue(d)
+          tooltip.html(d["DBA"]+" "+ d["CUISINE DESCRIPTION"] + "<br/>"
+          + d["BORO"] +" "+ d["BUILDING"]+ " "+ d["STREET"]+" "+d["ZIPCODE"]
+          +"<br/>"+ "Phone#: "+d["PHONE"]
+          +"<br/> (" + xValue(d)
 	        + ", " + yValue(d) + ")")
                .style("left", (d3.event.pageX + 5) + "px")
                .style("top", (d3.event.pageY - 28) + "px");
@@ -173,17 +151,18 @@ d3.csv("../Data/CuisineSummary/10rest.csv", function(error, data) {
 
   // draw legend colored rectangles
   legend.append("rect")
-      .attr("x", width - 18)
+      .attr("x", 18)
       .attr("width", 18)
       .attr("height", 18)
       .style("fill", color);
 
   // draw legend text
   legend.append("text")
-      .attr("x", width - 24)
+      .attr("x", 24)
       .attr("y", 9)
-      .attr("dy", ".35em")
-      .style("text-anchor", "end")
+      .attr("dy", "0.35em")
+      .attr("dx","1em")
+      .style("text-anchor", "start")
       .text(function(d) { return d;})
 });
 

@@ -1,5 +1,5 @@
 body{
-  margin:0;
+  margin: 0;
   padding:0;
   font-family: sans-serif;
   background-image: url(../img/blur_benjamin-gremler-qONhYBVNz1c-unsplash.jpg);
@@ -8,6 +8,10 @@ body{
   background-attachment: fixed;
   background-position: center;
   color:#FFF;
+}
+.content{
+  max-width: 980px;
+  margin:auto;
 }
 nav{
   position: relative;
