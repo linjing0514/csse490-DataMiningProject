@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,6 +28,8 @@
     </header>
   </nav>
 
+<div class='content'>
+
 <h1>Cuisine Types By Boro</h1>
 <a>The number of violations for each cuisine type varies on which boro,
   or general location, that the restaurants are in. You can view the number
@@ -37,76 +38,37 @@
 </a>
 <div id="op_dataviz2"></div>
 
-<!-- <script src="https://www.gstatic.com/firebasejs/7.8.2/firebase-firestore.js"></script> -->
 <!-- Load d3.js -->
 <script src="https://d3js.org/d3.v4.js"></script>
 <!-- Color Scale -->
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 
-<!-- <div id="op_dataviz"></div> -->
-
-<!-- Initialize a select button -->
+<!-- Initialize select buttons -->
 <div>
 <a> Sort by boro: </a>
-<select id="selectButton"></select>
+<select id="selectButtonBoro"></select>
 </div>
 
-<!-- Initialize a select button -->
 <div>
 <a> Sort by cuisine type: </a>
 <select id="selectButtonCuisineType"></select>
 </div>
 
-<div id="graphTitle">Text</div>
+<!-- Create a div for the graph title -->
+<div id="graphTitle"></div>
 
 <!-- Create a div where the graph will take place -->
 <div id="div_for_graph"></div>
 
 <script>
-/*
-// set the dimensions and margins of the graph
-var margin = {top: 10, right: 100, bottom: 30, left: 30},
-    width = 460 - margin.left - margin.right,
-    height = 400 - margin.top - margin.bottom;
-
-// append the svg object to the body of the page
-var svg = d3.select("#div_for_graph")
-  .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform",
-          "translate(" + margin.left + "," + margin.top + ")");
-*/
-// TESTING:
-/*
-var myData = null;
-var dataSet = "Seafood";
-
-d3.csv("../Data/Olivia/bcd-" + dataSet + ".csv")
-    .row(function(d) { return {key: d.Boro, value: +d.NumViolations}; })
-    .get(function(error, rows) {
-      //console.log(rows);
-      myData = rows;// Now you can assign it
-      myDataIsReady()// Now you can draw it
-    });
-
-function myDataIsReady() {
-  //console.log(myData);// will trace the data that was loaded
-  // Here you can draw your visualization
-
-}
-*/
-
-//Read the data
 d3.csv("../Data/Olivia/allDataNoFilter.csv", function(data) {
-    // List of groups (here I have one group per column)
     var allGroup = data.columns.filter(item => item!='CUISINE DESCRIPTION');
     var allGroupCuisineType = data.map(function (d) {return d['CUISINE DESCRIPTION'];});
-    console.log("ALL GROUP ATTEMPT: ", allGroupCuisineType);
 
-    // add the options to the button
-    d3.select("#selectButton")
+    /*
+        ====== ADD IN THE DROP DOWN MENUS ============
+    */
+    d3.select("#selectButtonBoro")
       .selectAll('myOptions')
      	.data(allGroup)
       .enter()
@@ -114,7 +76,6 @@ d3.csv("../Data/Olivia/allDataNoFilter.csv", function(data) {
       .text(function (d) { return d; }) // text showed in the menu
       .attr("value", function (d) { return d; }) // corresponding value returned by the button
 
-    // add the options to the button
     d3.select("#selectButtonCuisineType")
       .selectAll('myOptions')
      	.data(allGroupCuisineType)
@@ -123,16 +84,14 @@ d3.csv("../Data/Olivia/allDataNoFilter.csv", function(data) {
       .text(function (d) { return d; }) // text showed in the menu
       .attr("value", function (d) { return d; }) // corresponding value returned by the button
 
-    // A color scale: one color for each group
-    var myColor = d3.scaleOrdinal()
-      .domain(allGroup)
-      .range(d3.schemeSet2);
-
+    /*
+      ====== INITIALIZE VARIABLES ============
+    */
     var margin = {top: 10, right: 30, bottom: 90, left: 40},
         width = 800 - margin.left - margin.right,
         height = 450 - margin.top - margin.bottom;
 
-    // Append SVG to page body
+    /* ========== Append SVG to body =================== */
     var svg = d3.select("#div_for_graph")
       .append("svg")
         .attr("width", width + margin.left + margin.right)
@@ -141,206 +100,178 @@ d3.csv("../Data/Olivia/allDataNoFilter.csv", function(data) {
         .attr("transform",
               "translate(" + margin.left + "," + margin.top + ")");
 
-    // Initialize X axis:
+    /* ========== Initialize X axis =================== */
     var x = d3.scaleBand().range([0,width]);
     var xAxis = d3.axisBottom(x);
-    svg.append("g")
-      .attr("transform", "translate(0," + height + ")")
-      .attr("class","myXaxis")
 
-    // Initialize a Y axis
+    /* ========== Initialize Y axis =================== */
     var y = d3.scaleLinear().range([height, 0]);
     var yAxis = d3.axisLeft(y);
-    svg.append("g")
-      .attr("class","myYaxis")
+
+    var g = svg.append("g")
 
 
-    // A function that update the chart
+    /*
+      ====== UPDATE BY BORO FUNCTION ============
+    */
     function updateBoro(selectedGroup) {
       d3.csv("../Data/Olivia/bb-" + selectedGroup + ".csv", function (myData) {
-        // var headerString = 'Number of Violations By Cuisine Type in ' + selectedGroup;
         d3.select('#graphTitle')
           .html("<br><h2>Number of Violations by Cuisine Type in " + selectedGroup+"<br></h2>");
 
-        // console.log(myData);
         var temp = myData.map(function(d) { return {key: d.CuisineDescription, value: +d.NumViolations}; });
         var min = temp[temp.length - 1].value;
         var max = temp[0].value;
-        // Update X axis
+
+        /* ========== Update X axis =================== */
         x.domain(myData.map(function(d) { return d.CuisineDescription; }));
-        svg.selectAll(".myXaxis")
+
+        g.selectAll(".myXaxis")
           .transition()
           .duration(1500)
           .call(xAxis)
           .selectAll("text")
           .attr("transform", "translate(-10,0)rotate(-15)")
           .style("text-anchor", "end");
-        // Update Y Axis
+
+        g.append("g")
+          .attr("transform", "translate(0," + height + ")")
+          .attr("class","myXaxis")
+
+        /* ========== Update Y axis =================== */
         y.domain([min-250,max+250]);
-        svg.selectAll(".myYaxis").transition()
+
+        g.append("g")
+          .attr("class", "myYaxis")
+
+        g.selectAll(".myYaxis")
+          .transition()
           .duration(1500)
           .call(yAxis);
-       // Add bars
-        var myBars = svg.selectAll(".mybar")
-          .attr("fill", function(d){ return myColor(selectedGroup) })
+
+        /* ========== Add the bars =================== */
+        g.selectAll(".mybar")
           .data(myData)
-       // Update bars
-        myBars.enter()
-        	.append("rect")
+          .enter()
+          .append("rect")
           .attr("class","mybar")
-        	.attr("x", function(d) {console.log(d.CuisineDescription); return x(d.CuisineDescription); })
-        	.attr("width", x.bandwidth())
-        	// no bar at the beginning thus:
-        	.attr("height", function(d) { return height - y(0); }) // always equal to 0
-        	.attr("y", function(d) { return y(0); })
-        // Animate the bars
-        svg.selectAll("rect")
+          .attr("x", 0 )
+          .attr("y", function(d) { return y(0); })
+          .attr("width", 0)
+          .attr("height", function(d) { return height - y(0); })
+
+        /* ========== Animate the bars =================== */
+        g.selectAll("rect")
+          .attr("x", function(d) {return x(d.CuisineDescription); })
+          .attr("width", x.bandwidth())
           .transition()
+          .attr("fill", "#8da0cb")
           .duration(1750)
           .attr("y", function(d) { return y(d.NumViolations); })
-          .attr("height", function(d) { return height - y(d.NumViolations); })
-          .delay(function(d,i){ return(i*100)})
+          .attr("height", function(d)
+              {
+                if (y(d.NumViolations) > 0)
+                {return height - y(d.NumViolations)}
+                else {return 0}
+            ;})
+          .delay(function(d,i){ return(i*75)})
         })
     }
 
-    // A function that update the chart
+    /*
+      ====== UPDATE BY CUISINE FUNCTION ============
+    */
     function updateCuisine(selectedGroup) {
       d3.csv("../Data/Olivia/bcd-" + selectedGroup + ".csv", function (myData) {
-        // console.log(myData);
         d3.select('#graphTitle')
           .html("<br><h2>Number of Violations by Boro by  " + selectedGroup + " cuisine<br></h2>");
 
         var temp = myData.map(function(d) { return {key: d.Boro, value: +d.NumViolations}; });
-        var min = temp[temp.length - 1].value;
+        var min = 0;
         var max = temp[0].value;
-        // Update X axis
+
+        /* ========== Update X axis =================== */
         x.domain(myData.map(function(d) { return d.Boro; }));
-        svg.selectAll(".myXaxis")
+
+        g.selectAll(".myXaxis")
           .transition()
           .duration(1500)
           .call(xAxis)
           .selectAll("text")
           .attr("transform", "translate(-10,0)rotate(-15)")
           .style("text-anchor", "end");
-        // Update Y Axis
+
+        g.append("g")
+          .attr("transform", "translate(0," + height + ")")
+          .attr("class","myXaxis")
+
+        /* ========== Update Y axis =================== */
         y.domain([min,max+5]);
-        svg.selectAll(".myYaxis").transition()
+
+        g.append("g")
+          .attr("class", "myYaxis")
+
+        g.selectAll(".myYaxis")
+          .transition()
           .duration(1500)
           .call(yAxis);
 
-       // Add bars
-        var myBars = svg.selectAll(".mybar")
-          .attr("fill", function(d){ return myColor(selectedGroup) })
+       /* ========== Add the bars =================== */
+       g.selectAll(".mybar")
           .data(myData)
-
-        myBars.enter()
+          .enter()
         	.append("rect")
           .attr("class","mybar")
-        	.attr("x", function(d) { return x(d.Boro); })
-        	.attr("width", x.bandwidth())
+          .attr("x", 0 )
+          .attr("y", function(d) { return y(0); })
+          .attr("width", 0)
+          .attr("height", function(d) { return height - y(0); })
 
-        	// no bar at the beginning thus:
-        	.attr("height", function(d) { return height - y(0); }) // always equal to 0
-        	.attr("y", function(d) { return y(0); })
 
-        // Animate the bars
-        svg.selectAll("rect")
+      /* ========== Animate the bars =================== */
+        g.selectAll("rect")
+          .attr("x", function(d) {return x(d.Boro); })
+          .attr("width", x.bandwidth())
           .transition()
+          .attr("fill", "#8da0cb")
           .duration(1750)
           .attr("y", function(d) { return y(d.NumViolations); })
-          .attr("height", function(d) { return height - y(d.NumViolations); })
-          .delay(function(d,i){ return(i*100)})
+          .attr("height", function(d)
+              {if (y(d.NumViolations) > 0)
+                {return height - y(d.NumViolations)}
+                else {return 0}
+            ;})
+          .delay(function(d,i){ return(i*75)})
         })
     }
 
-    // When the button is changed, run the updateChart function
-    d3.select("#selectButton").on("change", function(d) {
-        var selectedOption = d3.select(this).property("value")   // recover the option that has been chosen
-        updateBoro(selectedOption) // run the updateChart function with this selected option
+
+    /*
+      ====== SET DROP DOWN FUNCTIONALITY ============
+    */
+    d3.select("#selectButtonBoro").on("change", function(d) {
+        var selectedOption = d3.select(this).property("value") // get chosen val
+        updateBoro(selectedOption) // update based on val
     })
 
-  // When the button is changed, run the updateChart function
     d3.select("#selectButtonCuisineType").on("change", function(d) {
-        var selectedOption = d3.select(this).property("value")   // recover the option that has been chosen
-        updateCuisine(selectedOption) // run the updateChart function with this selected option
+        var selectedOption = d3.select(this).property("value") // get chosen val
+        updateCuisine(selectedOption) // update based on val
     })
 
-    // INITIALIZE
+
+    /*
+      ====== INITIALIZE THE GRAPH ============
+    */
     updateBoro(allGroup[0]);
+    updateBoro(allGroup[0]);
+    // updateCuisine(allGroupCuisineType[0]);
+    // updateCuisine(allGroupCuisineType[0]);
 
 })
 
-
-
 </script>
-
-
-<!--OLD STUFF: -->
-<!--
-<script>
-
-// Graph dimensions
-var margin = {top: 10, right: 30, bottom: 90, left: 40},
-    width = 800 - margin.left - margin.right,
-    height = 450 - margin.top - margin.bottom;
-
-var data = d3.range(10).map(Math.random).sort(d3.descending);
-console.log(data);
-
-// Append SVG to page body
-var svg = d3.select("#op_dataviz")
-  .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform",
-          "translate(" + margin.left + "," + margin.top + ")");
-
-// Read the data:
-d3.csv("../Data/CuisineTypeByBoro/americanCuisineByBoro.csv",
-  function(data) {
-// Add X axis
-var x = d3.scaleBand()
-	.range([ 0, width ])
-	.domain(data.map(function(d) { return d.BoroName; }))
-	.padding(0.2);
-svg.append("g")
-	.attr("transform", "translate(0," + height + ")")
-	.call(d3.axisBottom(x))
-	.selectAll("text")
-	.attr("transform", "translate(-10,0)rotate(-45)")
-	.style("text-anchor", "end");
-
-// Add Y axis
-var y = d3.scaleLinear()
-	.domain([0, 50000])
-	.range([ height, 0]);
-svg.append("g")
-	.call(d3.axisLeft(y));
-
-// Add bars
-svg.selectAll("mybar")
-	.data(data)
-	.enter()
-	.append("rect")
-	.attr("x", function(d) { return x(d.BoroName); })
-	.attr("width", x.bandwidth())
-	.attr("fill", "#69b3a2")
-	// no bar at the beginning thus:
-	.attr("height", function(d) { return height - y(0); }) // always equal to 0
-	.attr("y", function(d) { return y(0); })
-
-// Animate the bars
-svg.selectAll("rect")
-	.transition()
-	.duration(2000)
-	.attr("y", function(d) { return y(d.NumViolations); })
-	.attr("height", function(d) { return height - y(d.NumViolations); })
-	.delay(function(d,i){console.log(i) ; return(i*100)})
-})
-
-</script>
--->
+</div>
 </body>
 </html>
 <html>
